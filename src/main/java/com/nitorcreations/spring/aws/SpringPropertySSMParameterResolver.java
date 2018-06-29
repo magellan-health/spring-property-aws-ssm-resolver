@@ -1,8 +1,11 @@
 package com.nitorcreations.spring.aws;
 
-import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
-import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder;
-import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -11,11 +14,10 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder;
+import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest;
+import com.amazonaws.services.simplesystemsmanagement.model.GetParametersRequest;
 
 @Component
 public class SpringPropertySSMParameterResolver implements EnvironmentPostProcessor {
@@ -53,9 +55,9 @@ public class SpringPropertySSMParameterResolver implements EnvironmentPostProces
 
         String resolveSsmParameter(String value, String prefix) {
             String ssmParameterName = value.substring(prefix.length());
-            GetParameterRequest request = new GetParameterRequest().withName(ssmParameterName).withWithDecryption(true);
+            GetParametersRequest request = new GetParametersRequest().withNames(ssmParameterName).withWithDecryption(true);
 
-            return getAWSClient().getParameter(request).getParameter().getValue();
+            return getAWSClient().getParameters(request).getParameters().get(0).getValue();
         }
 
         /**
